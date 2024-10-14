@@ -7,7 +7,7 @@ const axios = require("axios");
 
 // Function to classify the prompt using Stoic GPT API
 async function classifyPrompt(prompt) {
-  const classificationPrompt = `Classify this prompt as anime, fantasy or realistic: "${prompt}". Ensure that you just reply with the result: anime, fantasy or realistic.`;
+  const classificationPrompt = `Classify this prompt as anime, fantasy, or realistic. You only have these 3 options so you have to choose among this: "${prompt}". Ensure that you just reply with the result: anime, fantasy, or realistic.`;
   
   const stoicGptApiUrl = `https://www.samirxpikachu.run.place/stoicgpt?query=${encodeURIComponent(classificationPrompt)}`;
   const response = await axios.get(stoicGptApiUrl);
@@ -43,7 +43,7 @@ module.exports = {
     cooldowns: 20,
     role: 1,
     shortDescription: "Generate an image based on a prompt.",
-    longDescription: "Generates an image using the provided prompt by classifying it as anime or realistic.",
+    longDescription: "Generates an image using the provided prompt by classifying it as anime, fantasy, or realistic.",
     category: "ai"
   },
 
@@ -72,6 +72,8 @@ module.exports = {
       let selectedAPI;
       if (classificationResult.toLowerCase() === "anime") {
         selectedAPI = animeAPI; // Using the Anime API for anime classification
+      } else if (classificationResult.toLowerCase() === "fantasy") {
+        selectedAPI = fantasyAPI; // Using the Fantasy API for fantasy classification
       } else if (classificationResult.toLowerCase() === "realistic") {
         selectedAPI = realisticAPI; // Using the Realistic API for realistic classification
       } else {
@@ -104,7 +106,7 @@ module.exports = {
       const stream = fs.createReadStream(imagePath);
 
       message.reply({
-        body: `✨ | Here is your midjourney generated image with the prompt: "${prompt}"!`,
+        body: `✨ | Here is your MidJourney generated image with the prompt: "${prompt}"!`,
         attachment: stream
       });
 
