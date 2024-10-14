@@ -6,11 +6,15 @@ module.exports = {
 	config: {
 		name: "adminonly",
 		aliases: ["adonly", "onlyad", "onlyadmin"],
-		version: "1.5",
+		version: "1.3",
 		author: "NTKhang",
 		countDown: 5,
 		role: 2,
-		description: {
+		shortDescription: {
+			vi: "bật/tắt chỉ admin sử dụng bot",
+			en: "turn on/off only admin can use bot"
+		},
+		longDescription: {
 			vi: "bật/tắt chế độ chỉ admin mới có thể sử dụng bot",
 			en: "turn on/off only admin can use bot"
 		},
@@ -56,7 +60,7 @@ module.exports = {
 			return message.SyntaxError();
 
 		if (isSetNoti) {
-			config.hideNotiMessage.adminOnly = !value;
+			config.adminOnly.hideNotiMessage = !value;
 			message.reply(getLang(value ? "turnedOnNoti" : "turnedOffNoti"));
 		}
 		else {
