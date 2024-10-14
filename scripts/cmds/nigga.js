@@ -1,4 +1,4 @@
--cmd install savage.js const axios = require('axios');
+const axios = require('axios');
 
 // Function to get the base API URL from a GitHub-hosted JSON file
 const baseApiUrl = async () => {
