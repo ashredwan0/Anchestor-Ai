@@ -1,12 +1,13 @@
 const fs = require("fs");
-const globalRedwanAPI = 'https://redwans-mid-journey.onrender.com';
-const animeAPI = 'https://redwans-xl-api-1.onrender.com';
+const fantasyAPI = 'https://redwans-mid-journey.onrender.com'; // Fantasy API
+const realisticAPI = 'https://redwans-realism-api.onrender.com'; // Realistic API
+const animeAPI = 'https://redwans-xl-api-1.onrender.com'; // Anime API
 const path = require("path");
 const axios = require("axios");
 
 // Function to classify the prompt using Stoic GPT API
 async function classifyPrompt(prompt) {
-  const classificationPrompt = `Classify this prompt as anime or realistic: "${prompt}". Ensure that you just reply with the result: anime or realistic.`;
+  const classificationPrompt = `Classify this prompt as anime, fantasy or realistic: "${prompt}". Ensure that you just reply with the result: anime, fantasy or realistic.`;
   
   const stoicGptApiUrl = `https://www.samirxpikachu.run.place/stoicgpt?query=${encodeURIComponent(classificationPrompt)}`;
   const response = await axios.get(stoicGptApiUrl);
@@ -35,8 +36,8 @@ async function fetchImageUntilReady(apiUrl) {
 
 module.exports = {
   config: {
-    name: "imagegen",
-    aliases: ["img"],
+    name: "midjourney",
+    aliases: ["mj"],
     author: "Redwan",
     version: "1.0",
     cooldowns: 20,
@@ -70,9 +71,9 @@ module.exports = {
       // Select the appropriate API based on the classification result
       let selectedAPI;
       if (classificationResult.toLowerCase() === "anime") {
-        selectedAPI = animeAPI;
+        selectedAPI = animeAPI; // Using the Anime API for anime classification
       } else if (classificationResult.toLowerCase() === "realistic") {
-        selectedAPI = globalRedwanAPI;
+        selectedAPI = realisticAPI; // Using the Realistic API for realistic classification
       } else {
         return api.sendMessage("❌ | Classification result is invalid. Please provide a clear prompt.", event.threadID, event.messageID);
       }
@@ -103,7 +104,7 @@ module.exports = {
       const stream = fs.createReadStream(imagePath);
 
       message.reply({
-        body: `✨ | Here is your generated image with the prompt: "${prompt}"!`,
+        body: `✨ | Here is your midjourney generated image with the prompt: "${prompt}"!`,
         attachment: stream
       });
 
