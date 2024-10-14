@@ -1,5 +1,4 @@
-const axios = require('axios');
-let isGaeOn = true; // Initial state: 'gae' command is active
+-cmd install savage.js const axios = require('axios');
 
 // Function to get the base API URL from a GitHub-hosted JSON file
 const baseApiUrl = async () => {
@@ -9,66 +8,62 @@ const baseApiUrl = async () => {
 
 module.exports = {
   config: {
-    name: "gae",  
-    aliases: ["gae", "nigga"],  
-    version: "1.0.2",  
-    author: "redwan",  
+    name: "savage",
+    aliases: ["savage", "sv"],
+    version: "1.0.0",
+    author: "Redwan",
     countDown: 0,
     role: 0,
     description: "Replies to all messages when it's on, and can be turned on/off.",
     category: "chat",
     guide: {
-      en: "Type 'gae on' to activate or 'gae off' to deactivate the bot. It will reply to messages when activated."
+      en: "Type 'savage on' to activate or 'savage off' to deactivate the bot."
     }
   },
-  
-  // Main function that handles incoming commands
-  onStart: async ({ api, event, args }) => {
-    const link = `${await baseApiUrl()}/baby`;  
-    const message = args.join(" ").toLowerCase();  
+
+  onStart: async function ({ api, args, event, threadsData }) {
+    // Check if 'on' or 'off' command is issued
+    if (args[0] === 'on' || args[0] === 'off') {
+      await threadsData.set(event.threadID, args[0] === "on", "settings.savage");
+      return api.sendMessage(args[0] === "on" ? "Savage is now active." : "Savage has been deactivated.", event.threadID, event.messageID);
+    }
+
+    // If no command, process the message
+    const link = `${await baseApiUrl()}/baby`; // Get the API link
+    const yourMessage = args.join(" ").toLowerCase(); // Combine message arguments
 
     try {
-      if (message === "gae off") {
-        isGaeOn = false;
-        return api.sendMessage("Gae bot has been deactivated.", event.threadID, event.messageID);
-      }
+      // Check if Savage is active
+      const isSavageOn = await threadsData.get(event.threadID, "settings.savage");
+      if (!isSavageOn) return; // Do nothing if the bot is off
 
-      if (message === "gae on") {
-        isGaeOn = true;
-        return api.sendMessage("Gae bot is now active.", event.threadID, event.messageID);
-      }
-
-      if (!isGaeOn) {
-        return; // Do nothing if the bot is off
-      }
-
-      if (message) {
-        const response = await axios.get(`${link}?text=${message}`);
-        const reply = response.data.reply || "Sorry, I couldn't understand that.";
-        return api.sendMessage(`${reply}`, event.threadID, event.messageID);
-      } else {
-        return api.sendMessage("Hi, I am here to help you!", event.threadID, event.messageID);
-      }
+      // Process and reply to the message
+      const response = await axios.get(`${link}?text=${yourMessage}`);
+      const reply = response.data.reply || "Sorry, I couldn't understand that.";
+      return api.sendMessage(reply, event.threadID, event.messageID);
       
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error occurred:", error);
       return api.sendMessage("Oops, something went wrong!", event.threadID, event.messageID);
     }
   },
 
-  // New onChat function to handle messages
-  onChat: async ({ api, event, args }) => {
-    if (!isGaeOn) return; // Only respond if the bot is active
+  onChat: async function ({ api, event, threadsData }) {
+    // Check if Savage is active
+    const isSavageOn = await threadsData.get(event.threadID, "settings.savage");
+    if (!isSavageOn) return; // Do nothing if the bot is off
 
-    const link = `${await baseApiUrl()}/baby`;  
-    const message = event.body.toLowerCase(); // Get the incoming message
+    const link = `${await baseApiUrl()}/baby`; // Get the API link
+    const yourMessage = event.body.toLowerCase(); // Get the incoming message
 
     try {
-      const response = await axios.get(`${link}?text=${message}`);
-      const reply = response.data.reply || "Sorry, I couldn't understand that."; // Fallback response
-      return api.sendMessage(`${reply}`, event.threadID, event.messageID);
+      // Process and reply to the message
+      const response = await axios.get(`${link}?text=${yourMessage}`);
+      const reply = response.data.reply || "Sorry, I couldn't understand that.";
+      return api.sendMessage(reply, event.threadID, event.messageID);
+      
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error occurred:", error);
       return api.sendMessage("Oops, something went wrong!", event.threadID, event.messageID);
     }
   }
