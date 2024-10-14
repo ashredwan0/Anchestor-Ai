@@ -1,5 +1,5 @@
 const fs = require("fs");
-const globalRedwanAPI = 'https://redwans-midjourney.onrender.com';
+const globalRedwanAPI = 'https://redwans-mid-journey.onrender.com';
 const path = require("path");
 const axios = require("axios");
 
@@ -71,7 +71,7 @@ module.exports = {
     author: "Redwan",
     version: "1.0",
     cooldowns: 20,
-    role: 0,
+    role: 1,
     shortDescription: "Generate an image based on a prompt using MidJourney API.",
     longDescription: "Generates an image using the provided prompt and streams the image to the chat.",
     category: "ai"
