@@ -39,17 +39,20 @@ module.exports = {
     name: "midjourney",
     aliases: ["mj"],
     author: "Redwan",
-    version: "1.0",
+    version: "1.2", // Updated version
     cooldowns: 20,
     role: 1,
     shortDescription: "Generate an image based on a prompt.",
-    longDescription: "Generates an image using the provided prompt by classifying it as anime, fantasy, or realistic.",
+    longDescription: "Generates an image using the provided prompt by classifying it as anime, fantasy, or realistic. You can also manually specify the model.",
     category: "ai"
   },
 
   onStart: async function ({ message, args, api, event }) {
-    // Determine the prompt
-    let prompt = args.join(" ");
+    // Check if the first argument is a model (anime, fantasy, realistic)
+    let selectedModel = args[0]?.toLowerCase();
+    let prompt = args.slice(1).join(" "); // Rest of the args as prompt
+
+    // If no prompt is found, try to use the reply message as the prompt
     if (!prompt && event.messageReply) {
       prompt = event.messageReply.body;
     }
@@ -60,29 +63,34 @@ module.exports = {
       return api.sendMessage("❌ | You need to provide a prompt.", event.threadID, event.messageID);
     }
 
+    // If a specific model is provided, skip classification
+    if (["anime", "fantasy", "realistic"].includes(selectedModel)) {
+      console.log(`Model provided: ${selectedModel}`);
+    } else {
+      // No model provided, classify the prompt
+      selectedModel = await classifyPrompt(prompt);
+      console.log("Classification Result:", selectedModel); // Log classification result
+    }
+
+    // Notify the user that the process is ongoing
+    api.sendMessage("🔄 | MidJourney process is ongoing, it might take some time...", event.threadID, event.messageID);
+
+    // Select the appropriate API based on the model
+    let selectedAPI;
+    if (selectedModel === "anime") {
+      selectedAPI = animeAPI;
+    } else if (selectedModel === "fantasy") {
+      selectedAPI = fantasyAPI;
+    } else if (selectedModel === "realistic") {
+      selectedAPI = realisticAPI;
+    } else {
+      return api.sendMessage("❌ | Invalid model specified. Please choose from anime, fantasy, or realistic.", event.threadID, event.messageID);
+    }
+
+    const apiUrl = `${selectedAPI}/generate?prompt=${encodeURIComponent(prompt)}`;
+    console.log(`Requesting image generation from URL: ${apiUrl}`);
+
     try {
-      // Classify the prompt
-      const classificationResult = await classifyPrompt(prompt);
-      console.log("Classification Result:", classificationResult); // Log classification result
-
-      // Notify the user that the process is ongoing
-      api.sendMessage("🔄 | MidJourney process is ongoing, it might take some time...", event.threadID, event.messageID);
-
-      // Select the appropriate API based on the classification result
-      let selectedAPI;
-      if (classificationResult.toLowerCase() === "anime") {
-        selectedAPI = animeAPI; // Using the Anime API for anime classification
-      } else if (classificationResult.toLowerCase() === "fantasy") {
-        selectedAPI = fantasyAPI; // Using the Fantasy API for fantasy classification
-      } else if (classificationResult.toLowerCase() === "realistic") {
-        selectedAPI = realisticAPI; // Using the Realistic API for realistic classification
-      } else {
-        return api.sendMessage("❌ | Classification result is invalid. Please provide a clear prompt.", event.threadID, event.messageID);
-      }
-
-      const apiUrl = `${selectedAPI}/generate?prompt=${encodeURIComponent(prompt)}`;
-      console.log(`Requesting image generation from URL: ${apiUrl}`);
-
       // Fetch the image
       const imageUrl = await fetchImageUntilReady(apiUrl);
 
