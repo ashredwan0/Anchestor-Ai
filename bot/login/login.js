@@ -61,6 +61,7 @@ function centerText(text, length) {
 	// Print the padded string to the terminal
 	console.log(paddedString);
 }
+
 // logo
 const titles = [
 	[
